@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser')
 const app = express();
-
+const axios =require('axios');
 var jsonParser = bodyParser.json();
 
 const corsOptions = {
@@ -14,30 +14,82 @@ const corsOptions = {
 app.use(cors(corsOptions));
 const port = 3030;
 
+const baseUrl = 'http://localhost:8000';
+const realmId = 'testing';
+const clientID = 'myclient';
+const clientSecretKey = 'T5qAZgrFo0GTzo1ymcBHSrCSxniy1pzu';
 
-app.get('/request-otp', (req, res) => {
-  if (req.query.user_id === '081234567890') {
+app.post(`/v1/${realmId}/otp/authenticate`, jsonParser, (req, res) => {
+  const { user_id, scope, client_id, code_challenge, code_challenge_method, response_type, auth_client } = req.body;
+
+  axios.post(`${baseUrl}/v1/${realmId}/otp/authenticate`, {
+    user_id, scope, client_id, code_challenge, code_challenge_method, response_type, auth_client
+  }, {
+    headers: {
+      clientID,
+      clientSecretKey
+    }
+  }).then((response) => {
     res.send({
-      otp: '01234567'
-    });
-  } else {
+      timestamp: response.data.timestamp
+    })
+  })
+  .catch((error) => {
+    if (error.response) {
+      // The request was made and the server responded with a status code
+      // that falls out of the range of 2xx
+      console.log(error.response.data);
+      console.log(error.response.status);
+      console.log(error.response.headers);
+    } else if (error.request) {
+      // The request was made but no response was received
+      // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+      // http.ClientRequest in node.js
+      console.log(error.request);
+    } else {
+      // Something happened in setting up the request that triggered an Error
+      console.log('Error', error.message);
+    }
+    console.log(error.config);
     res.status(400);
-    res.statusMessage = 'Failed to request OTP.';
     res.send('Failed to request OTP.');
-  }
+  });
+
 });
 
-app.post('/validate-otp', jsonParser, (req, res) => {
+app.post(`/v1/${realmId}/otp/authenticate/validate`, jsonParser, (req, res) => {
   const { user_id, otp } = req.body;
-  if (user_id === '081234567890' && otp === '012345') {
+  axios.post(`${baseUrl}/v1/${realmId}/otp/authenticate/validate`, {
+    user_id, otp, client_id: clientID
+  }, {
+    headers: {
+      clientID,
+      clientSecretKey
+    }
+  }).then((response) => {
     res.send({
-      authorization_code: '1117777'
-    });
-  } else {
+      auth_code: response.data.auth_code,
+      timestamp: response.data.timestamp
+    })
+  }).catch((error) => {
+    if (error.response) {
+      // The request was made and the server responded with a status code
+      // that falls out of the range of 2xx
+      console.log(error.response.data);
+      console.log(error.response.status);
+      console.log(error.response.headers);
+    } else if (error.request) {
+      // The request was made but no response was received
+      // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+      // http.ClientRequest in node.js
+      console.log(error.request);
+    } else {
+      // Something happened in setting up the request that triggered an Error
+      console.log('Error', error.message);
+    }
     res.status(400);
-    res.statusMessage = 'Failed to validate OTP.';
-    res.send('Failed to validate OTP.');
-  }
+    res.send('Failed to request OTP.');
+  });
 });
 
 app.listen(port, () => {
