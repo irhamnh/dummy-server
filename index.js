@@ -15,13 +15,11 @@ app.use(cors(corsOptions));
 const port = 3030;
 
 const baseUrl = 'http://localhost:8000';
-const realmId = 'testing';
 
-app.post(`/v1/${realmId}/otp/authenticate`, jsonParser, (req, res) => {
-  const { user_id, scope, client_id, code_challenge, code_challenge_method, response_type, auth_client } = req.body;
-  const { clientID, clientSecretKey } = req.header;
+app.post(`/v1/testing/otp/authenticate`, jsonParser, (req, res) => {
+  const { user_id, scope, client_id, code_challenge, code_challenge_method, response_type, auth_client, realm_id, clientID, clientSecretKey } = req.body;
 
-  axios.post(`${baseUrl}/v1/${realmId}/otp/authenticate`, {
+  axios.post(`${baseUrl}/v1/${realm_id}/otp/authenticate`, {
     user_id, scope, client_id, code_challenge, code_challenge_method, response_type, auth_client
   }, {
     headers: {
@@ -56,11 +54,10 @@ app.post(`/v1/${realmId}/otp/authenticate`, jsonParser, (req, res) => {
 
 });
 
-app.post(`/v1/${realmId}/otp/authenticate/validate`, jsonParser, (req, res) => {
-  const { user_id, otp } = req.body;
-  const { clientID, clientSecretKey } = req.header;
+app.post(`/v1/testing/otp/authenticate/validate`, jsonParser, (req, res) => {
+  const { user_id, otp, realm_id, clientID, clientSecretKey } = req.body;
   
-  axios.post(`${baseUrl}/v1/${realmId}/otp/authenticate/validate`, {
+  axios.post(`${baseUrl}/v1/${realm_id}/otp/authenticate/validate`, {
     user_id, otp, client_id: clientID
   }, {
     headers: {
@@ -89,7 +86,7 @@ app.post(`/v1/${realmId}/otp/authenticate/validate`, jsonParser, (req, res) => {
       console.log('Error', error.message);
     }
     res.status(400);
-    res.send('Failed to request OTP.');
+    res.send('Failed to validate OTP.');
   });
 });
 
