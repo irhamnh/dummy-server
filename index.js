@@ -16,11 +16,10 @@ const port = 3030;
 
 const baseUrl = 'http://localhost:8000';
 const realmId = 'testing';
-const clientID = 'myclient';
-const clientSecretKey = 'T5qAZgrFo0GTzo1ymcBHSrCSxniy1pzu';
 
 app.post(`/v1/${realmId}/otp/authenticate`, jsonParser, (req, res) => {
   const { user_id, scope, client_id, code_challenge, code_challenge_method, response_type, auth_client } = req.body;
+  const { clientID, clientSecretKey } = req.header;
 
   axios.post(`${baseUrl}/v1/${realmId}/otp/authenticate`, {
     user_id, scope, client_id, code_challenge, code_challenge_method, response_type, auth_client
@@ -59,6 +58,8 @@ app.post(`/v1/${realmId}/otp/authenticate`, jsonParser, (req, res) => {
 
 app.post(`/v1/${realmId}/otp/authenticate/validate`, jsonParser, (req, res) => {
   const { user_id, otp } = req.body;
+  const { clientID, clientSecretKey } = req.header;
+  
   axios.post(`${baseUrl}/v1/${realmId}/otp/authenticate/validate`, {
     user_id, otp, client_id: clientID
   }, {
