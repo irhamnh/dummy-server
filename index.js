@@ -17,15 +17,10 @@ const port = 3030;
 const baseUrl = 'http://localhost:8000';
 
 app.post(`/v1/testing/otp/authenticate`, jsonParser, (req, res) => {
-  const { user_id, scope, client_id, code_challenge, code_challenge_method, response_type, auth_client, realm_id, clientID, clientSecretKey } = req.body;
+  const { user_id, scope, client_id, code_challenge, code_challenge_method, response_type, auth_client, realm_id} = req.body;
 
   axios.post(`${baseUrl}/v1/${realm_id}/otp/authenticate`, {
     user_id, scope, client_id, code_challenge, code_challenge_method, response_type, auth_client
-  }, {
-    headers: {
-      clientID,
-      clientSecretKey
-    }
   }).then((response) => {
     res.send({
       timestamp: response.data.timestamp
@@ -55,15 +50,10 @@ app.post(`/v1/testing/otp/authenticate`, jsonParser, (req, res) => {
 });
 
 app.post(`/v1/testing/otp/authenticate/validate`, jsonParser, (req, res) => {
-  const { user_id, otp, realm_id, clientID, clientSecretKey } = req.body;
+  const { user_id, otp, realm_id, client_id} = req.body;
   
   axios.post(`${baseUrl}/v1/${realm_id}/otp/authenticate/validate`, {
-    user_id, otp, client_id: clientID
-  }, {
-    headers: {
-      clientID,
-      clientSecretKey
-    }
+    user_id, otp, client_id
   }).then((response) => {
     res.send({
       auth_code: response.data.auth_code,
